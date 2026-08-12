@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JQ — Just Quit</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Serif+JP:wght@400;600;800&display=swap');
+
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:#030407;color:#eeeef1}
+body{overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;z-index:-5;background:
+radial-gradient(circle at 50% 35%,rgba(255,113,175,.045),transparent 26%),
+radial-gradient(circle at 15% 80%,rgba(255,255,255,.025),transparent 28%),
+linear-gradient(180deg,#030407 0%,#05060a 55%,#020306 100%);pointer-events:none}
+body:after{content:"";position:fixed;inset:0;z-index:-4;opacity:.18;pointer-events:none;background-image:
+linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),
+linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);
+background-size:72px 72px}
+
+.nav{height:72px;display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;padding:0 34px;border-bottom:1px solid #1a1b21;background:rgba(3,4,7,.88);backdrop-filter:blur(18px);position:relative;z-index:30}
+.navItem{position:relative;font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}
+.navItem:nth-child(2){text-align:center}.navItem:last-child{text-align:right}
+.navItem>span{display:inline-flex;align-items:center;gap:9px;height:72px;color:#d7d7dc}
+.navItem>span:hover{color:#fff}
+.arrow{font-size:11px;opacity:.45}
+.menu{position:absolute;top:64px;min-width:215px;background:#08090d;border:1px solid #27282f;border-radius:10px;padding:7px;box-shadow:0 24px 70px #000d;opacity:0;pointer-events:none;transform:translateY(-5px);transition:.16s}
+.navItem:hover .menu,.navItem.open .menu{opacity:1;pointer-events:auto;transform:none}
+.leftMenu{left:0}.centerMenu{left:50%;transform:translate(-50%,-5px)}
+.navItem:hover .centerMenu,.navItem.open .centerMenu{transform:translate(-50%,0)}
+.rightMenu{right:0}
+.menu a,.menu button{display:block;width:100%;padding:12px 13px;border:0;background:transparent;color:#d9d9dd;text-decoration:none;text-align:left;border-radius:7px;cursor:pointer;font:inherit;font-size:11px;letter-spacing:.12em;font-weight:700}
+.menu a:hover,.menu button:hover{background:#15161b;color:#fff}
+
+.hero{min-height:calc(100vh - 72px);display:flex;align-items:center;justify-content:center;text-align:center;padding:80px 20px;position:relative;overflow:hidden}
+.hero:before{content:"桜";position:absolute;right:7vw;top:14vh;font-family:"Noto Serif JP",serif;font-size:clamp(110px,18vw,250px);font-weight:800;color:#fff;opacity:.018;writing-mode:vertical-rl;line-height:1}
+.hero:after{content:"";position:absolute;width:min(620px,85vw);height:min(620px,85vw);border-radius:50%;border:1px solid rgba(255,255,255,.045);box-shadow:0 0 120px rgba(255,105,170,.025)}
+.content{position:relative;z-index:3}
+.kicker{font-size:10px;letter-spacing:.42em;color:#8d8d95;font-weight:800;margin-bottom:24px}
+.logo{font-size:clamp(100px,19vw,205px);line-height:.76;font-weight:950;letter-spacing:-.1em;color:#f4f4f5;text-shadow:0 25px 90px rgba(255,255,255,.06)}
+.title{font-size:clamp(22px,4vw,46px);letter-spacing:.28em;font-weight:800;margin-top:32px;color:#f0eef0}
+.phrase{margin:23px auto 0;color:#777880;max-width:680px;line-height:1.9;font-size:12px;letter-spacing:.08em}
+.cta{display:flex;gap:10px;justify-content:center;margin-top:34px;flex-wrap:wrap}
+.cta a,.action{padding:12px 19px;border:1px solid #303138;border-radius:7px;text-decoration:none;color:#ddd;font-size:10px;font-weight:800;letter-spacing:.16em;background:rgba(8,9,13,.7);cursor:pointer}
+.cta a:hover{border-color:#777;color:#fff}
+.cta a.primary{background:#f1edf0;color:#08090d;border-color:#f1edf0}
+.watermark{position:fixed;bottom:18px;left:24px;color:#55565e;font-size:10px;letter-spacing:.14em;z-index:5}
+
+.sakuraLayer{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.petal{position:absolute;top:-30px;width:8px;height:5px;background:#f18ab8;border-radius:90% 10% 90% 10%;opacity:.0;filter:drop-shadow(0 0 6px rgba(241,138,184,.35));animation:fall linear infinite}
+.petal:nth-child(1){left:8%;animation-duration:12s;animation-delay:-3s;transform:rotate(18deg) scale(.8)}
+.petal:nth-child(2){left:18%;animation-duration:15s;animation-delay:-9s;transform:rotate(-18deg) scale(1.1)}
+.petal:nth-child(3){left:31%;animation-duration:11s;animation-delay:-5s;transform:rotate(42deg) scale(.7)}
+.petal:nth-child(4){left:46%;animation-duration:17s;animation-delay:-13s;transform:rotate(12deg)}
+.petal:nth-child(5){left:59%;animation-duration:13s;animation-delay:-2s;transform:rotate(-35deg) scale(.8)}
+.petal:nth-child(6){left:72%;animation-duration:16s;animation-delay:-11s;transform:rotate(30deg) scale(1.15)}
+.petal:nth-child(7){left:84%;animation-duration:12s;animation-delay:-7s;transform:rotate(-20deg) scale(.75)}
+.petal:nth-child(8){left:93%;animation-duration:18s;animation-delay:-15s;transform:rotate(45deg) scale(.9)}
+@keyframes fall{
+0%{top:-5%;opacity:0;transform:translateX(0) rotate(0deg) scale(.8)}
+12%{opacity:.7}
+50%{transform:translateX(80px) rotate(170deg) scale(1)}
+88%{opacity:.45}
+100%{top:105%;opacity:0;transform:translateX(-70px) rotate(340deg) scale(.75)}
+}
+
+.panel{display:none;position:fixed;inset:72px 0 0;background:rgba(3,4,7,.975);z-index:25;padding:55px 7vw;overflow:auto}
+.panel.active{display:block}
+.panel:before{content:"JQ";position:absolute;right:5vw;bottom:-2vw;font-size:25vw;font-weight:950;letter-spacing:-.12em;color:#fff;opacity:.012;pointer-events:none}
+.panelHead{max-width:900px;position:relative;z-index:2}
+.panel h2{font-size:clamp(38px,6vw,62px);margin:0 0 10px;letter-spacing:.05em}
+.panel p{color:#777880;max-width:720px;line-height:1.8;font-size:13px}
+.close{position:absolute;right:28px;top:25px;border:1px solid #292a31;background:#090a0e;color:#aaa;border-radius:7px;padding:9px 13px;cursor:pointer;font-size:10px;letter-spacing:.12em}
+.close:hover{color:#fff;border-color:#666}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:13px;margin-top:30px;max-width:1100px}
+.card{padding:22px;border:1px solid #22232a;border-radius:10px;background:#090a0e;transition:.18s;position:relative;overflow:hidden}
+.card:after{content:"";position:absolute;right:-25px;top:-25px;width:90px;height:90px;border-radius:50%;border:1px solid rgba(241,138,184,.08)}
+.card:hover{transform:translateY(-2px);border-color:#3b3c44}
+.cardTitle{font-size:17px;font-weight:900;color:#eee}
+.platform{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#b1b1b7;margin-bottom:9px;font-weight:800}
+.card a{display:inline-block;margin-top:14px;color:#bcbcc3;text-decoration:none;font-size:11px;word-break:break-all}
+.card a:hover{color:#f18ab8}
+.muted{color:#65666e;font-size:11px;margin-top:7px;line-height:1.6}
+.price{font-size:28px;font-weight:900;color:#f0eef0}
+.sectionTabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:25px}
+.sectionTabs button{border:1px solid #292a31;background:#090a0e;color:#74757d;padding:10px 14px;border-radius:7px;cursor:pointer;font-weight:800;font-size:10px;letter-spacing:.12em}
+.sectionTabs button:hover{color:#ddd}
+.sectionTabs button.active{background:#eeeef0;color:#08090d;border-color:#eeeef0}
+.mediaGroup{display:none}
+.mediaGroup.active{display:block}
+.empty{padding:26px;border:1px dashed #2a2b32;border-radius:10px;color:#65666e;max-width:760px;margin-top:28px;background:#08090d}
+.linkList{display:grid;gap:10px;max-width:760px;margin-top:25px}
+.linkBox{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:17px 18px;border:1px solid #22232a;border-radius:10px;background:#090a0e}
+.linkBox strong{display:block;color:#ddd}.linkBox span{font-size:10px;color:#62636b}
+.linkBox a{color:#aaa;text-decoration:none;font-size:10px;letter-spacing:.08em}.linkBox a:hover{color:#f18ab8}
+
+@media(max-width:650px){
+.nav{padding:0 12px}.navItem{font-size:9px;letter-spacing:.14em}.watermark{left:14px}
+.menu{min-width:160px;max-height:70vh;overflow:auto}
+.hero{padding-top:50px}.panel{padding:45px 20px}.panel h2{font-size:38px}
+.linkBox{align-items:flex-start;flex-direction:column}
+.close{right:16px}.hero:before{right:2vw;top:20vh}
+}
+@media(prefers-reduced-motion:reduce){
+.petal{animation:none;display:none}
+}
+</style>
+</head>
+<body>
+<div class="sakuraLayer" aria-hidden="true">
+  <i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="petal"></i>
+  <i class="petal"></i><i class="petal"></i><i class="petal"></i><i class="petal"></i>
+</div>
+
+<nav class="nav">
+  <div class="navItem">
+    <span>MEDIA <b class="arrow">⌄</b></span>
+    <div class="menu leftMenu">
+      <button onclick="showMedia('twitch')">Twitch</button>
+      <button onclick="showMedia('tiktok')">TikTok</button>
+      <button onclick="showMedia('youtube')">YouTube</button>
+    </div>
+  </div>
+
+  <div class="navItem">
+    <span>MAIN <b class="arrow">⌄</b></span>
+    <div class="menu centerMenu">
+      <button onclick="show('support')">DONATE / SUPPORT</button>
+      <button onclick="show('news')">NEWS</button>
+      <button onclick="show('partners')">PARTNERS</button>
+      <button onclick="show('tgbot')">TG BOT</button>
+      <button onclick="show('info')">INFO</button>
+      <button onclick="show('buy')">BUY SEAT</button>
+    </div>
+  </div>
+
+  <div class="navItem">
+    <span>LANGUAGE <b class="arrow">⌄</b></span>
+    <div class="menu rightMenu">
+      <button onclick="setLang('RU')">RU</button>
+      <button onclick="setLang('ENG')">ENG</button>
+    </div>
+  </div>
+</nav>
+
+<main class="hero" id="home">
+  <section class="content">
+    <div class="kicker">JUST QUIT · ESPORTS ORGANIZATION</div>
+    <div class="logo">JQ</div>
+    <div class="title">JUST QUIT</div>
+    <div class="phrase" id="phrase">ЛУЧШИЙ ТЕГ. ЛУЧШАЯ КОМАНДА. НОВЫЙ УРОВЕНЬ.</div>
+    <div class="cta">
+      <a class="primary" href="https://t.me/JQclan" target="_blank">JOIN JQ</a>
+      <a href="https://t.me/JQtag" target="_blank">CONTACT</a>
+    </div>
+  </section>
+</main>
+
+<section class="panel" id="media">
+  <button class="close" onclick="closePanels()">CLOSE ×</button>
+  <div class="panelHead">
+    <h2>MEDIA</h2>
+    <p>Создатели и медиа JQ. Выбирай платформу — отображаются только аккаунты этой платформы.</p>
+  </div>
+
+  <div class="sectionTabs">
+    <button id="tab-twitch" onclick="showMedia('twitch')">TWITCH</button>
+    <button id="tab-tiktok" onclick="showMedia('tiktok')">TIKTOK</button>
+    <button id="tab-youtube" onclick="showMedia('youtube')">YOUTUBE</button>
+  </div>
+
+  <div class="mediaGroup" id="media-twitch">
+    <div class="cards">
+      <div class="card">
+        <div class="platform">TWITCH</div>
+        <div class="cardTitle">twistik</div>
+        <a href="https://www.twitch.tv/twwwistik" target="_blank">twitch.tv/twwwistik ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="mediaGroup" id="media-tiktok">
+    <div class="cards">
+      <div class="card">
+        <div class="platform">TIKTOK</div>
+        <div class="cardTitle">Hightoru</div>
+        <a href="https://www.tiktok.com/@hightoru?_t=ZN-8xbWjtzClJ4&_r=1" target="_blank">tiktok.com/@hightoru ↗</a>
+      </div>
+      <div class="card">
+        <div class="platform">TIKTOK</div>
+        <div class="cardTitle">Exponther</div>
+        <a href="https://www.tiktok.com/@exponther?_r=1&_t=ZS-98pcSCQfwHg" target="_blank">tiktok.com/@exponther ↗</a>
+      </div>
+      <div class="card">
+        <div class="platform">TIKTOK</div>
+        <div class="cardTitle">whpeeekk</div>
+        <a href="https://www.tiktok.com/@whpeeekk?_r=1&_t=ZS-98pcQg5axdv" target="_blank">tiktok.com/@whpeeekk ↗</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="mediaGroup" id="media-youtube">
+    <div class="cards">
+      <div class="card">
+        <div class="platform">YOUTUBE</div>
+        <div class="cardTitle">Hightoru</div>
+        <a href="https://youtube.com/@hightoru?si=vpCrI05IA_K5Wc8S" target="_blank">youtube.com/@hightoru ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="support">
+  <button class="close" onclick="closePanels()">CLOSE ×</button>
+  <div class="panelHead">
+    <h2>DONATE / SUPPORT</h2>
+    <p>Поддержать JQ или перейти к странице оплаты.</p>
+  </div>
+  <div class="cards">
+    <div class="card">
+      <div class="platform">DONATE</div>
+      <div class="cardTitle">Support JQ</div>
+      <div class="muted">Все донаты и поддержка через DonationAlerts.</div>
+      <div class="cta"><a class="primary" href="https://www.donationalerts.com/r/tiltoviy337" target="_blank">DONATE ↗</a></div>
+    </div>
+    <div class="card">
+      <div class="platform">DONATIONALERTS</div>
+      <div class="cardTitle">tiltoviy337</div>
+      <div class="muted">Основная страница приёма оплат.</div>
+      <div class="cta"><a href="https://www.donationalerts.com/r/tiltoviy337" target="_blank">OPEN ↗</a></div>
+    </div>
+    <div class="card">
+      <div class="platform">TELEGRAM</div>
+      <div class="cardTitle">@JQtag</div>
+      <div class="muted">Связь и поддержка.</div>
+      <div class="cta"><a href="https://t.me/JQtag" target="_blank">OPEN ↗</a></div>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="info">
+  <button class="close" onclick="closePanels()">CLOSE ×</button>
+  <div class="panelHead">
+    <h2>INFO</h2>
+    <p>Основная информация о JQ и заявки.</p>
+  </div>
+  <div class="linkList">
+    <div class="linkBox">
+      <div><strong>JQ Clan</strong><span>Основная ссылка / вступление</span></div>
+      <a href="https://t.me/JQclan" target="_blank">t.me/JQclan ↗</a>
+    </div>
+    <div class="linkBox">
+      <div><strong>JQ Tag</strong><span>Связь / поддержка</span></div>
+      <a href="https://t.me/JQtag" target="_blank">t.me/JQtag ↗</a>
+    </div>
+  </div>
+</section>
+
+<section class="panel" id="news">
+  <button class="close" onclick="closePanels()">CLOSE ×</button>
+  <div class="panelHead">
+    <h2>NEWS</h2>
+    <p>Новости и обновления JQ. Здесь позже появится лента публикаций.</p>
+  </div>
+  <div class="empty">NO NEWS YET · NEWS FEED WILL BE CONNECTED LATER</div>
+</section>
+
+<section class="panel" id="partners">
+  <button class="close" onclick="closePanels()">CLOSE ×</button>
+  <div class="panelHead">
+    <h2>PARTNERS</h2>
+    <p>Сейчас у JQ нет партнёров.</p>
+  </div>
+  <div class="empty">
+    NO PARTNERS YET<br><br>
+    You can text me for a deal<br>
+    <strong style="color:#eee;font-size:14px">@JQtag</strong>
+  </div>
+</section>
+
+<section class="panel" id="tgbot">
+  <button class="close" onclick="closePanels()">CLOSE ×</button>
+  <div class="panelHead">
+    <h2>TG BOT</h2>
+    <p>Telegram-бот JQ. Ссылка на самого бота пока не была прислана, поэтому здесь оставлена заглушка.</p>
+  </div>
+  <div class="empty">TG BOT LINK · WILL BE CONNECTED AFTER YOU SEND THE BOT USERNAME/LINK</div>
+</section>
+
+<section class="panel" id="buy">
+  <button class="close" onclick="closePanels()">CLOSE ×</button>
+  <div class="panelHead">
+    <h2>BUY SEAT</h2>
+    <p>Стоимость указана в рублях как основная. Эквиваленты в USD, BYN и UAH рассчитаны по официальным курсам Банка России на 13.08.2026 и округлены для отображения.</p>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="platform">SEAT · 7 DAYS</div>
+      <div class="price">99 ₽</div>
+      <div class="muted">$1.19 · 3.53 BYN · 53.33 ₴</div>
+      <div class="muted">Временное место на 7 дней.</div>
+      <div class="cta"><a class="primary" href="https://www.donationalerts.com/r/tiltoviy337" target="_blank">DONATE ↗</a></div>
+    </div>
+
+    <div class="card">
+      <div class="platform">SEAT · 30 DAYS</div>
+      <div class="price">299 ₽</div>
+      <div class="muted">$3.60 · 10.64 BYN · 161.09 ₴</div>
+      <div class="muted">Место на 30 дней.</div>
+      <div class="cta"><a class="primary" href="https://www.donationalerts.com/r/tiltoviy337" target="_blank">DONATE ↗</a></div>
+    </div>
+
+    <div class="card">
+      <div class="platform">SEAT · FOREVER</div>
+      <div class="price">799 ₽</div>
+      <div class="muted">$9.63 · 28.46 BYN · 430.66 ₴</div>
+      <div class="muted">Место навсегда · UNTIL YOU LEAVE THE TAG.</div>
+      <div class="cta"><a class="primary" href="https://www.donationalerts.com/r/tiltoviy337" target="_blank">DONATE ↗</a></div>
+    </div>
+
+    <div class="card">
+      <div class="platform">ROLE · ELDER</div>
+      <div class="price">999 ₽</div>
+      <div class="muted">$12.04 · 35.57 BYN · 538.06 ₴</div>
+      <div class="muted">Статус ELDER.</div>
+      <div class="cta"><a class="primary" href="https://www.donationalerts.com/r/tiltoviy337" target="_blank">DONATE ↗</a></div>
+    </div>
+
+    <div class="card">
+      <div class="platform">ROLE · CO LEADER</div>
+      <div class="price">2499 ₽</div>
+      <div class="muted">$30.11 · 89.02 BYN · 1,346.25 ₴</div>
+      <div class="muted">Статус CO LEADER.</div>
+      <div class="cta"><a class="primary" href="https://www.donationalerts.com/r/tiltoviy337" target="_blank">DONATE ↗</a></div>
+    </div>
+  </div>
+
+  <div class="linkList">
+    <div class="linkBox">
+      <div><strong>PAYMENT</strong><span>Donate / DonationAlerts</span></div>
+      <a href="https://www.donationalerts.com/r/tiltoviy337" target="_blank">PAY VIA DONATIONALERTS ↗</a>
+    </div>
+  </div>
+</section>
+
+<div class="watermark">T.ME/JQCLAN</div>
+
+<script>
+const panels=[...document.querySelectorAll('.panel')];
+
+function show(id){
+  panels.forEach(p=>p.classList.toggle('active',p.id===id));
+  document.querySelectorAll('.navItem').forEach(n=>n.classList.remove('open'));
+}
+
+function closePanels(){
+  panels.forEach(p=>p.classList.remove('active'));
+}
+
+function showMedia(platform){
+  panels.forEach(p=>p.classList.toggle('active',p.id==='media'));
+  document.querySelectorAll('.mediaGroup').forEach(g=>g.classList.remove('active'));
+  document.querySelectorAll('.sectionTabs button').forEach(b=>b.classList.remove('active'));
+
+  const group=document.getElementById('media-'+platform);
+  const tab=document.getElementById('tab-'+platform);
+  if(group) group.classList.add('active');
+  if(tab) tab.classList.add('active');
+
+  document.querySelectorAll('.navItem').forEach(n=>n.classList.remove('open'));
+}
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.navItem')){
+    document.querySelectorAll('.navItem').forEach(n=>n.classList.remove('open'));
+  }
+});
+
+document.querySelectorAll('.navItem>span').forEach(s=>{
+  s.addEventListener('click',()=>{
+    if(matchMedia('(hover:none)').matches){
+      const n=s.parentElement;
+      n.classList.toggle('open');
+    }
+  });
+});
+
+function setLang(l){
+  const ru={
+    phrase:'ЛУЧШИЙ ТЕГ. ЛУЧШАЯ КОМАНДА. НОВЫЙ УРОВЕНЬ.'
+  };
+  const eng={
+    phrase:'THE BEST TAG. THE BEST TEAM. THE NEXT LEVEL.'
+  };
+  document.getElementById('phrase').textContent=(l==='ENG'?eng:ru).phrase;
+}
+</script>
+</body>
+</html>
